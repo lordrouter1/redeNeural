@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 
 #include "Neuron.cpp"
 
@@ -201,7 +202,12 @@ public:
             // Imprime o erro médio para esta época
             std::cout << "Epoca " << epoch + 1 << ", Erro Medio: " << meanError << std::endl;
 
-            if(meanError > lastError) break;
+            if(meanError > lastError || meanError <= target){
+                exportWeights("weights.out");
+                exportDeltas("deltas.out");
+                getWeights();
+                break;
+            }
 
             lastError = meanError;
         }
@@ -240,6 +246,106 @@ public:
                 std::cout << std::endl;
             }
             std::cout << std::endl << std::endl;
+        }
+    }
+
+    // Função para exportar pesos para um arquivo
+    void exportWeights(const std::string& filename) const {
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            // Salve os pesos das conexões ponderadas
+            for (int i = 0; i < outputWeights.size(); ++i) {
+                for (int j = 0; j < outputWeights[i].size(); ++j) {
+                    file << outputWeights[i][j] << " ";
+                }
+                file << std::endl;
+            }
+
+            for (int i = 0; i < hiddenWeights.size(); ++i) {
+                for (int j = 0; j < hiddenWeights[i].size(); ++j) {
+                    for (int k = 0; k < hiddenWeights[i][j].size(); ++k) {
+                        file << hiddenWeights[i][j][k] << " ";
+                    }
+                    file << std::endl;
+                }
+            }
+
+            file.close();
+        } else {
+            std::cerr << "Erro ao abrir o arquivo para exportar pesos." << std::endl;
+        }
+    }
+
+    // Função para importar pesos de um arquivo
+    void importWeights(const std::string& filename) {
+        std::ifstream file(filename);
+        if (file.is_open()) {
+            // Carregue os pesos das conexões ponderadas
+            for (int i = 0; i < outputWeights.size(); ++i) {
+                for (int j = 0; j < outputWeights[i].size(); ++j) {
+                    file >> outputWeights[i][j];
+                }
+            }
+
+            for (int i = 0; i < hiddenWeights.size(); ++i) {
+                for (int j = 0; j < hiddenWeights[i].size(); ++j) {
+                    for (int k = 0; k < hiddenWeights[i][j].size(); ++k) {
+                        file >> hiddenWeights[i][j][k];
+                    }
+                }
+            }
+
+            file.close();
+        } else {
+            std::cerr << "Erro ao abrir o arquivo para importar pesos." << std::endl;
+        }
+    }
+
+    // Função para exportar deltas para um arquivo
+    void exportDeltas(const std::string& filename) const {
+        std::ofstream file(filename);
+        if (file.is_open()) {
+            // Salve os deltas dos neurônios
+            for (int i = 0; i < outputLayer.size(); ++i) {
+                file << outputLayer[i].getDelta() << " ";
+            }
+            file << std::endl;
+
+            for (int i = 0; i < hiddenLayer.size(); ++i) {
+                for (int j = 0; j < hiddenLayer[i].size(); ++j) {
+                    file << hiddenLayer[i][j].getDelta() << " ";
+                }
+                file << std::endl;
+            }
+
+            file.close();
+        } else {
+            std::cerr << "Erro ao abrir o arquivo para exportar deltas." << std::endl;
+        }
+    }
+
+    // Função para importar deltas de um arquivo
+    void importDeltas(const std::string& filename) {
+        std::ifstream file(filename);
+        if (file.is_open()) {
+            // Carregue os deltas dos neurônios
+            for (int i = 0; i < outputLayer.size(); ++i) {
+                double delta;
+                file >> delta;
+                outputLayer[i].setDelta(delta);
+            }
+
+            for (int i = 0; i < hiddenLayer.size(); ++i) {
+                for (int j = 0; j < hiddenLayer[i].size(); ++j) {
+                    double delta;
+                    file >> delta;
+                    hiddenLayer[i][j].setDelta(delta);
+                }
+            }
+
+            file.close();
+        } else {
+            std::cerr << "Erro ao abrir o arquivo para importar deltas." << std::endl;
         }
     }
 
