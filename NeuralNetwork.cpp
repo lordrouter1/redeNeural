@@ -200,7 +200,7 @@ public:
             const double meanError = totalError / numSamples;
 
             // Imprime o erro médio para esta época
-            std::cout << "Epoca " << epoch + 1 << ", Erro Medio: " << meanError << std::endl;
+            printf("[%d] %f\n", epoch + 1, meanError);
 
             if(meanError > lastError || meanError <= target){
                 exportWeights("weights.out");
